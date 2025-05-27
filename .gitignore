@@ -1,0 +1,19 @@
+# Archivos de compilación
+/target
+/.idea
+*.iml
+*.class
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración
+application.properties
+
+# Archivos del sistema operativo
+*.log
+
+# Carpetas de configuración de IDEs
+/.vscode
+/.idea
