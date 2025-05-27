@@ -19,16 +19,31 @@ public class MySqlWorkedHoursRepository implements WorkedHoursRepository {
 
     @Override
     public boolean employeeExists(int employeeId) {
-        String sql = "SELECT COUNT(*) FROM employees WHERE id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, employeeId);
-        return count != null && count > 0;
+        try (Connection conn = jdbc.getDataSource().getConnection()) {
+            CallableStatement stmt = conn.prepareCall("{CALL ZEUS_EMPLOYEE_EXISTS(?, ?)}");
+            stmt.setInt(1, employeeId);
+            stmt.registerOutParameter(2, Types.BOOLEAN);
+            stmt.execute();
+            return stmt.getBoolean(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean workedDateExists(int employeeId, LocalDate workedDate) {
-        String sql = "SELECT COUNT(*) FROM worked_hours WHERE employee_id = ? AND worked_date = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, employeeId, workedDate);
-        return count != null && count > 0;
+        try (Connection conn = jdbc.getDataSource().getConnection()) {
+            CallableStatement stmt = conn.prepareCall("{CALL ZEUS_WORKED_DATE_EXISTS(?, ?, ?)}");
+            stmt.setInt(1, employeeId);
+            stmt.setDate(2, Date.valueOf(workedDate));
+            stmt.registerOutParameter(3, Types.BOOLEAN);
+            stmt.execute();
+            return stmt.getBoolean(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override

@@ -17,23 +17,45 @@ public class MySqlEmployeeRepository implements EmployeeRepository {
 
     @Override
     public boolean existsByNameAndLastName(String name, String lastName) {
-        String sql = "SELECT COUNT(*) FROM employees WHERE name = ? AND last_name = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, name, lastName);
-        return count != null && count > 0;
+        try (Connection conn = jdbc.getDataSource().getConnection()) {
+            CallableStatement stmt = conn.prepareCall("{CALL ZEUS_EMPLOYEE_NAME_EXISTS(?, ?, ?)}");
+            stmt.setString(1, name);
+            stmt.setString(2, lastName);
+            stmt.registerOutParameter(3, Types.BOOLEAN);
+            stmt.execute();
+            return stmt.getBoolean(3);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean genderExists(int genderId) {
-        String sql = "SELECT COUNT(*) FROM genders WHERE id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, genderId);
-        return count != null && count > 0;
+        try (Connection conn = jdbc.getDataSource().getConnection()) {
+            CallableStatement stmt = conn.prepareCall("{CALL ZEUS_GENDER_EXISTS(?, ?)}");
+            stmt.setInt(1, genderId);
+            stmt.registerOutParameter(2, Types.BOOLEAN);
+            stmt.execute();
+            return stmt.getBoolean(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean jobExists(int jobId) {
-        String sql = "SELECT COUNT(*) FROM jobs WHERE id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, jobId);
-        return count != null && count > 0;
+        try (Connection conn = jdbc.getDataSource().getConnection()) {
+            CallableStatement stmt = conn.prepareCall("{CALL ZEUS_JOB_EXISTS(?, ?)}");
+            stmt.setInt(1, jobId);
+            stmt.registerOutParameter(2, Types.BOOLEAN);
+            stmt.execute();
+            return stmt.getBoolean(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
